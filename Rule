@@ -1,0 +1,59 @@
+package test;
+
+public class Rule {
+  static int ID_num=1;
+	String ruleID;
+	String ruleCode;
+	String description;
+	String TableName;
+	public Rule()
+	{
+		ruleID = "Rule"+ID_num;
+		ID_num ++;
+	}
+	public void set_ruleID(String ID)
+	{
+		ruleID = ID;
+	}
+	public void set_ruleCode(String Code)
+	{
+		ruleCode = Code;
+	}
+	public void set_description(String desc)
+	{
+		description = desc;
+	}
+	public void set_all(String [] turple)
+	{
+		set_ruleCode(turple[1]);
+		set_description(turple[2]);
+		TableName=turple[0];
+		
+	}
+	public String get_ruleID()
+	{
+		return ruleID;
+	}
+	public String get_ruleCode()
+	{
+		return ruleCode;
+	}
+	public String get_description()
+	{
+		return description;
+	}
+	public void Insert_table()
+	{
+		String query = "";
+		query += "INSERT INTO "+TableName+" (RuleCode,RuleDescription) "+" VALUES(";
+		
+        //query += "\""+ruleID+"\",";
+        query += "\""+ruleCode+"\",";
+        query += "\""+description+"\"";		
+        query += ")";
+		System.out.println(query);
+		Mysql.updateQuery(query);
+	}
+	
+
+}
