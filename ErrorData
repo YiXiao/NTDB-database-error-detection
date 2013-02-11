@@ -1,0 +1,77 @@
+package test;
+
+public class ErrorData {
+  //static int ID_num=1;
+	//String rule_logicID;
+	String primarykey;
+	String TableName;
+	
+	String SchemaName;
+	String ErrorName;
+	String ErrorDescription;
+	//public ErrorData()
+	//{
+		//rule_logicID = "Rule"+ID_num;
+		//ID_num ++;
+	//}
+	public void set_primarykey(String key)
+	{
+		primarykey = key;
+	}
+	public void set_ErrorDescription(String description)
+	{
+		ErrorDescription = description;
+	}
+	public void set_TableName(String name)
+	{
+		TableName = name;
+	}
+	public void set_ErrorName(String errorname)
+	{
+		ErrorName = errorname;
+	}
+	//public void set_primarykeyTableName(String keyname)
+	//
+	//	primarykeyTableName = keyname;
+	//}
+	public void set_SchemaName(String schemaname)
+	{
+		SchemaName = schemaname;
+	}
+	
+	
+	
+	public void set_all(String [] turple)
+	{
+		set_primarykey(turple[0]);
+		set_TableName(turple[1]);
+	}
+	public String get_primarykey()
+	{
+		return primarykey;
+	}
+	public String get_TableName()
+	{
+		return TableName;
+	}
+	public String get_ErrorName()
+	{
+		return ErrorName;
+	}
+	
+	public void Insert_table(String Name)
+	{
+		String query = "";
+		query += "INSERT INTO "+Name+" (primaryKey,TableName,ErrorName,SchemaName) "+" VALUES(";
+		
+        query += "\""+primarykey+"\",";
+        query += "\""+TableName+"\",";
+        query += "\""+ErrorName+"\",";
+        query += "\""+SchemaName+"\"";
+        query += ")";
+		//System.out.println(query);
+		Mysql.updateQuery(query);
+	}
+	
+
+}
