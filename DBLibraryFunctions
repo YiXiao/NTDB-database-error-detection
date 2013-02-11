@@ -1,0 +1,81 @@
+//This class is for some inner operation. Connection, Prepare and execute. 
+package test;
+
+import java.sql.PreparedStatement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+
+
+public class DBLibraryFunctions 
+{  
+  
+	//DB connection function
+	Connection GetConnectObject(String url,String username,String password)
+    {  
+		Connection con = null;
+		try 
+		{
+			con = DriverManager.getConnection(url, username, password);
+		}
+		catch (SQLException ex) 
+		{
+            Logger lgr = Logger.getLogger(DBLibraryFunctions.class.getName());
+            lgr.log(Level.SEVERE, ex.getMessage(), ex);
+        } 
+		return con;
+    } 
+	
+	
+	//DB Prepare function
+	PreparedStatement Prepare(Connection con, String Query)
+	{
+		 PreparedStatement pst = null;
+		 try 
+		 {
+			 pst = con.prepareStatement(Query);
+		 }
+		 catch (SQLException ex) 
+		 {
+             Logger lgr = Logger.getLogger(DBLibraryFunctions.class.getName());
+             lgr.log(Level.SEVERE, ex.getMessage(), ex);
+         }
+		 return pst;
+	}
+	
+	
+	//DB Execute function
+	ResultSet RunQuery(PreparedStatement pst)
+	{
+		 ResultSet rs = null;
+		 try 
+		 {
+			 rs = pst.executeQuery();
+		 }
+		 catch (SQLException ex) 
+		 {
+             Logger lgr = Logger.getLogger(DBLibraryFunctions.class.getName());
+             lgr.log(Level.SEVERE, ex.getMessage(), ex);
+         }
+		 return rs;
+	 }
+	
+	void updateQuery(PreparedStatement pst)
+	{
+		 try 
+		 {
+			 pst.executeUpdate();
+		 }
+		 catch (SQLException ex) 
+		 {
+             Logger lgr = Logger.getLogger(DBLibraryFunctions.class.getName());
+             lgr.log(Level.SEVERE, ex.getMessage(), ex);
+         }
+	}
+	
+	
+}
