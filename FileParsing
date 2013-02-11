@@ -1,0 +1,246 @@
+package test;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.regex.*;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class FileParsing
+{
+  public boolean iputParsing(String Filename)
+	{
+		ArrayList<Object> list = new ArrayList<Object> (); //ArrayList
+
+		File file = null;
+		BufferedReader br = null;
+		String str = null;
+		int Flag = 1;
+		String TableNamePattern = "@[a-zA-Z]*";
+		String CodePattern = " [a-zA-Z0-9]* ";
+		String DataTableNamePattern = "([ ]*rds_[a-z]*)";
+		String DescriptionPattern = "(\\`)[^\\`]*(\\`)";
+		String DescriptionBodyPattern = "if[^\\`]*";
+
+		String DescriptionIf = "if";
+		String DescriptionTable = "[a-zA-Z0-9_]*\\.";
+		String DescriptionTableColumn = "\\.[a-zA-Z0-9_]*";
+		String DescriptionError = "raise error[0-9]*";
+		
+		
+
+		String Remove = "if |then raise error[0-9]*|[a-zA-Z0-9_]*\\.";
+
+		Pattern matchWholeStringErrorAndRule = Pattern.compile(TableNamePattern+CodePattern+DescriptionPattern);
+		Pattern matchWholeStringLogic = Pattern.compile(TableNamePattern+CodePattern+DescriptionPattern+DataTableNamePattern); //@table code "description"
+		Pattern matchTableName = Pattern.compile(TableNamePattern);                            //table name
+		Pattern matchCode = Pattern.compile(CodePattern);                         //Code
+		Pattern matchDescription = Pattern.compile(DescriptionPattern);//description
+		Pattern matchDataTableName = Pattern.compile(DataTableNamePattern);//description
+
+
+		Pattern matchIf = Pattern.compile(DescriptionIf);
+		Pattern matchTable = Pattern.compile(DescriptionTable);
+		Pattern matchColumn = Pattern.compile(DescriptionTableColumn);
+		Pattern matchError = Pattern.compile(DescriptionError);
+
+		
+
+
+		Pattern matchBody = Pattern.compile(DescriptionBodyPattern);
+
+		try
+		{
+			file = new File(Filename);
+	        br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+
+	        while((str = br.readLine()) != null)       //parse each line
+	        {
+	        	 Matcher m = matchWholeStringLogic.matcher(str);
+	        	 boolean b = m.matches();
+	        	 Matcher n = matchWholeStringErrorAndRule.matcher(str);
+	        	 boolean c = n.matches();
+	        	 if(b||c)
+	        	 {
+	        		System.out.println("Parse Successfully!");
+	        		String TableName = "";
+	        		String Code = "";
+	        		String Description = "";
+	        		String DataTableName = "";
+	        		String IFString = "";
+	        		String TableString = "";
+	        		String ColumnString = "";
+	        		String ErrorString = "";
+	        		String BodyString = "";
+
+	        		Matcher TABLENAME = matchTableName.matcher(str);
+	        		if(TABLENAME.find())
+	        		TableName = TABLENAME.group().replace("@", "");//table name
+	        		Matcher CODE = matchCode.matcher(str);
+	        		if(CODE.find())
+	        		Code = CODE.group().replace(" ", "");//Code
+	        		Matcher DATATABLE = matchDataTableName.matcher(str);
+	        		if(DATATABLE.find())
+	        		DataTableName = DATATABLE.group().replaceAll("\'| ", "");// THE DataTable
+	        		Matcher DESC = matchDescription.matcher(str);
+	        		if(DESC.find())
+	        		Description = DESC.group().replace("`","");// THE STRING
+	        		System.out.println(Description);
+
+	        		Matcher BODY = matchBody.matcher(str);
+	        		if(BODY.find())
+	        		BodyString = BODY.group().replaceAll(Remove, "");// Remove if
+
+
+
+
+	        		Matcher IF = matchIf.matcher(Description);
+	        		if(IF.find())
+	        		IFString = IF.group();
+
+	        		Matcher TABLE = matchTable.matcher(Description);
+	        		if(TABLE.find())
+	        		TableString = TABLE.group().replace(".", "");
+
+	        		Matcher COLUMN = matchColumn.matcher(Description);
+	        		if(COLUMN.find())
+	        		ColumnString = COLUMN.group().replace(".", "");
+
+	        		Matcher ERROR = matchError.matcher(Description);
+	        		if(ERROR.find())
+	        		ErrorString = ERROR.group().replace("raise ", "");
+
+	        		if(TableName.equals("ErrorDescription")) //error table
+	        		{
+	        			Error data = new Error();
+	        			data.TableName = TableName;
+	        			data.set_errorCode(Code);
+	        			data.set_description(Description);
+		        		list.add (data);
+		        		System.out.println(Code);
+		      
+		        		
+		        		data.Insert_table();
+	        		}
+	        		if(TableName.equals("RuleDescription")) //rule table
+	        		{
+	        			Rule data = new Rule();
+	        			data.TableName = TableName;
+	        			data.set_ruleCode(Code);
+	        			data.set_description(Description);
+		        		list.add (data);
+		        		//for (int i=0,i<list.size(),i++)
+		        		//{
+		        		  //  System.out.println()
+		        		//}
+		        		
+		        		data.Insert_table();
+	        		}
+	        		String SQLstring = "";
+	        		String PRISQLstring = "";
+	        		String errorName = "";
+	        		String primarykey = "";
+	        		String ErrorDescriptionSQL = "";
+	        		String ErrorDescription = "";
+	        		String PRIKEY = "";
+	        		if(TableName.equals("rulelogic")) //rulelogic table
+	        		{
+	        			Mysql.InitializeSchema("information_schema");
+	        			PRISQLstring = "select COLUMN_NAME from columns where table_name =\"rds_demo\" and table_schema=\"NTDB2011\" and column_key=\"PRI\"";
+	        			ResultSet PRI = Mysql.executeQuery(PRISQLstring);
+	        			try
+	        			{
+	        				while(PRI.next())
+		        			{
+		        				PRIKEY = PRI.getString(1);
+		        			}
+	        			}
+	        			catch (SQLException ex) 
+        		  	    {
+        		              Logger lgr = Logger.getLogger(DBLibraryFunctions.class.getName());
+        		              lgr.log(Level.SEVERE, ex.getMessage(), ex);
+        		        }
+	        			//System.out.println(PRIKEY);
+	        			SQLstring = "select "+ PRIKEY +" from " +DataTableName+ " where "+BodyString;
+        				//System.out.println(SQLstring);
+	        			Mysql.Initialize(Mysql.schema);
+        				try
+        				{
+        					ResultSet rs = Mysql.executeQuery(SQLstring);
+        					while(rs.next())
+            				{
+        						String primaryKey = rs.getString(1);
+        						//System.out.println(primaryKey);
+        						
+            					if(primaryKey=="")
+            					    	primaryKey = "NULL";
+            					
+            						//System.out.println("Error Exists in rds_demo");
+            						ErrorData allerror = new ErrorData();
+    	        					errorName = ErrorString;
+    	    		        		allerror.set_ErrorName(errorName);
+    	    		        		allerror.set_primarykey(primaryKey);
+    	    		        		allerror.set_TableName(DataTableName);
+    	    		        		allerror.set_SchemaName(Mysql.schema);
+    	    		        		allerror.Insert_table("ErrorData");
+    	    		        		//System.out.println("We should raise "+errorName);
+                                
+            					
+            				}
+        				}
+        				catch (SQLException ex) 
+        		  	    {
+        		              Logger lgr = Logger.getLogger(DBLibraryFunctions.class.getName());
+        		              lgr.log(Level.SEVERE, ex.getMessage(), ex);
+        		        }
+        				
+        				
+
+
+
+        				
+	        		}
+	        		
+
+	        	 }
+	        	 else
+	        	 {
+	        		System.out.println("Parse Failed!");
+	        		Flag = 0;
+	        	 }
+	        }
+		}
+	    catch(IOException ioe)
+	    {
+	    	ioe.printStackTrace();
+	    }
+		finally
+		{
+            try
+            {
+                br.close();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+		if(Flag == 1)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+}
