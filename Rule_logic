@@ -1,0 +1,46 @@
+package test;
+
+public class Rule_logic {
+  static int ID_num=1;
+	String rule_logicID;
+	String description;
+	String TableName;
+	public Rule_logic()
+	{
+		rule_logicID = "Rule"+ID_num;
+		ID_num ++;
+	}
+	public void set_rule_logicID(String ID)
+	{
+		rule_logicID = ID;
+	}
+	public void set_description(String desc)
+	{
+		description = desc;
+	}
+	public void set_all(String [] turple)
+	{
+		set_description(turple[1]);
+		TableName=turple[0];
+	}
+	public String get_rule_logicID()
+	{
+		return rule_logicID;
+	}
+	public String get_description()
+	{
+		return description;
+	}
+	public void Insert_table()
+	{
+		String query = "";
+		query += "INSERT INTO "+TableName+" (logicCode,description) "+" VALUES(";
+        query += "\""+rule_logicID+"\",";
+        query += "\""+description+"\"";		
+        query += ")";
+		//System.out.println(query);
+		Mysql.updateQuery(query);
+	}
+	
+
+}
