@@ -1,0 +1,58 @@
+package test;
+
+public class Error {
+  static int ID_num=1;
+	int errorID;
+	String errorCode;
+	String description;
+	String TableName;
+	
+	public Error()
+	{
+		errorID = ID_num;
+		ID_num ++;
+	}
+	//public void set_errorID(int ID)
+	//{
+		//errorID = ID;
+	//}
+	public void set_errorCode(String Code)
+	{
+		errorCode = Code;
+	}
+	public void set_description(String desc)
+	{
+		description = desc;
+	}
+	public void set_all(String [] turple)
+	{
+		set_errorCode(turple[1]);
+		set_description(turple[2]);
+		TableName=turple[0];
+	}
+	public int get_errorID()
+	{
+		return errorID;
+	}
+	public String get_errorCode()
+	{
+		return errorCode;
+	}
+	public String get_description()
+	{
+		return description;
+	}
+	public void Insert_table()
+	{
+		String query = "";
+		query += "INSERT INTO "+TableName+" (ErrorCode,ErrorDescription) "+" VALUES(";
+        query += "\""+errorCode+"\",";
+        query += "\""+description+"\"";		
+        query += ")";
+		System.out.println(query);
+		Mysql.updateQuery(query);
+	}
+	
+	
+}
+
