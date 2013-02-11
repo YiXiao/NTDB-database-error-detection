@@ -1,0 +1,168 @@
+// This class give us two main functions. You can just give them the query
+//They may use the inner operations which are in DBL
+
+package test;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class Mysql 
+{
+  
+	
+	public static String schema = "";
+	public static String Pri_schema = "";
+	
+	//DB attribute
+	private static String url = "jdbc:mysql://igo.cs.ucsb.edu/"; // give the URL
+	private static String user = "ntdb"; // give the user
+    private static String password = "ntdb"; // give the password
+    
+    public static String primaryKey = "";
+    public static String errorDescription = "";
+    
+    public static boolean InitializeSchema(String Schema)
+    {
+    	Pri_schema = Schema;
+    	url = "jdbc:mysql://igo.cs.ucsb.edu/"+Pri_schema;
+    	return true;
+    }
+    public static boolean Initialize(String Schema)
+    {
+    	schema = Schema;
+    	url = "jdbc:mysql://igo.cs.ucsb.edu/"+Schema;
+    	return true;
+    }
+    public static boolean updateQuery(String Query)
+    {
+    	Connection con = null;
+		PreparedStatement pst = null;
+		 
+    	DBLibraryFunctions a = new  DBLibraryFunctions(); //load DBL function
+    	con = a.GetConnectObject(url, user, password);
+    	pst =  a.Prepare(con, Query);
+    	a.updateQuery(pst);
+    	try 
+    	{
+            if (pst != null) 
+            {
+            	pst.close();
+            }
+            if (con != null) 
+            {
+                con.close();
+            }
+        }
+        catch (SQLException ex) 
+        {
+        	Logger lgr = Logger.getLogger(Mysql.class.getName());
+            lgr.log(Level.WARNING, ex.getMessage(), ex);
+        }
+    	return true;
+    }
+    public static ResultSet executeQuery(String Query)
+    {
+    	Connection con = null;
+		ResultSet rs = null;
+		PreparedStatement pst = null;
+		 
+    	DBLibraryFunctions a = new  DBLibraryFunctions(); //load DBL function
+    	con = a.GetConnectObject(url, user, password);
+	    pst =  a.Prepare(con, Query);
+	    rs = a.RunQuery(pst);
+	    return rs;
+    	    /*
+    	    while (rs.next()) 
+    	    {
+    	    	//System.out.print(rs.getString(1)+"\n");
+    	    	primaryKey = rs.getString(1);
+            }
+            */
+    	/*
+  	    catch (SQLException ex) 
+  	    {
+              Logger lgr = Logger.getLogger(DBLibraryFunctions.class.getName());
+              lgr.log(Level.SEVERE, ex.getMessage(), ex);
+        }*/
+    	/*
+  	    finally 
+  	    {
+              try 
+              {
+                  if (rs != null) 
+                  {
+                      rs.close();
+                  }
+                  if (pst != null) 
+                  {
+                      pst.close();
+                  }
+                  if (con != null) 
+                  {
+                      con.close();
+                  }
+
+              }
+              catch (SQLException ex) 
+              {
+                  Logger lgr = Logger.getLogger(Mysql.class.getName());
+                  lgr.log(Level.WARNING, ex.getMessage(), ex);
+              }
+  	    }
+  	    */
+    	
+    }
+    public static boolean askErrorDescriptiony(String Query)
+    {
+    	Connection con = null;
+		ResultSet rs = null;
+		PreparedStatement pst = null;
+		 
+    	DBLibraryFunctions a = new  DBLibraryFunctions(); //load DBL function
+    	try
+  	    {
+    		con = a.GetConnectObject(url, user, password);
+    	    pst =  a.Prepare(con, Query);
+    	    rs = a.RunQuery(pst);
+    	    while (rs.next()) 
+    	    {
+    	    	//System.out.print(rs.getString(1)+"\n");
+    	    	errorDescription = rs.getString(1);
+            }
+  	    }
+  	    catch (SQLException ex) 
+  	    {
+              Logger lgr = Logger.getLogger(DBLibraryFunctions.class.getName());
+              lgr.log(Level.SEVERE, ex.getMessage(), ex);
+        }
+  	    finally 
+  	    {
+              try 
+              {
+                  if (rs != null) 
+                  {
+                      rs.close();
+                  }
+                  if (pst != null) 
+                  {
+                      pst.close();
+                  }
+                  if (con != null) 
+                  {
+                      con.close();
+                  }
+
+              }
+              catch (SQLException ex) 
+              {
+                  Logger lgr = Logger.getLogger(Mysql.class.getName());
+                  lgr.log(Level.WARNING, ex.getMessage(), ex);
+              }
+  	    }
+    	return true;
+    }
+}
